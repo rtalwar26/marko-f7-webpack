@@ -1,0 +1,144 @@
+<script>
+    import Framework7 from "framework7";
+
+    import config from "./routes";
+    import Dom7 from "dom7"
+
+    class {
+
+        onCreate() {
+
+        }
+
+        onMount() {
+            this.start()
+            this.addBackHandlers();
+        }
+
+        addBackHandlers() {
+            Dom7("a.move-back").on('click', () => {
+                window.app.views.main.router.back();
+            })
+        }
+
+        start() {
+            var theme = 'auto';
+
+            if (document.location.search.indexOf('theme=') >= 0) {
+                theme = document.location.search.split('theme=')[1].split('&')[0];
+            }
+            var app = new Framework7({
+                data: () => { return {}; },
+                theme: theme,
+                root: '#app',
+
+                name: 'My App',
+
+                id: 'com.myapp.test',
+
+                panel: {
+                    swipe: 'left',
+                },
+
+                routes: config.routes,
+
+            });
+            var mainView = app.views.create('.view-main', {
+                stackPages: true,
+                pushState: true,
+                url: "/mobile"
+
+            });
+            window.app = app;
+
+            // app.data.base_url = AppConfigUtil.get('base_url');
+            app.data.token = (document.location.search.indexOf('token=') >= 0) ?
+                document.location.search.split('token=')[1].split('&')[0] : app.data.token;
+            app.data.token = app.data.token || localStorage.getItem('token');
+            app.data.user = localStorage.getItem('lol:user');
+            let thisComp = this;
+            const informChild = (pageName, eventHandler) => {
+                let page = thisComp.getComponent(pageName);
+                page && (typeof page[eventHandler] === 'function') && page[eventHandler]();
+            }
+
+            setTimeout(async () => {
+
+                let router = app.views.main.router;
+
+                informChild(router.currentRoute.name, 'pageAfterIn');
+                informChild(router.currentRoute.name, 'pageBeforeIn');
+
+
+                app.on('pageBeforeIn', (page) => {
+
+                    informChild(page.name, 'pageBeforeIn');
+                })
+                app.on('pageAfterIn', (page) => {
+                    informChild(page.name, 'pageAfterIn');
+
+                })
+
+                app.on('pageBeforeOut', (page) => {
+                    informChild(page.name, 'pageBeforeOut');
+
+                })
+                app.on('pageAfterOut', (page) => {
+                    informChild(page.name, 'pageAfterOut');
+
+                })
+
+                try {
+                    await this.renew_login(app);
+                } catch (e) {
+
+                }
+            }, 1);
+
+
+        }
+        async renew_login(app) {
+            let stored_token = app.data.token;
+
+            stored_token && fetch(`${window.app.data.base_url}/tg-login-service/users/me?token=${stored_token}`).then(r =>
+                r.json()).then((user) => {
+                    window.app.data.user = user;
+                }).catch((e) => { });
+
+            stored_token ?
+                app.request.promise.get(`${window.app.data.base_url}/tg-login-service/token/renew`, { token: stored_token },
+                    'json').then((resp) => {
+                        localStorage.setItem('token', resp.token);
+                        app.data.token = resp.token;
+                        return resp.token;
+                    }).catch((e) => {
+
+                        return Promise.reject(e);
+                    }) : ((() => {
+                        // window.location = app.data.env === 'production' ? '/crm/login' : window.location;
+                        return Promise.resolve(true);
+                    })())
+        }
+    }
+</script>
+<div id="app">
+    <!-- Statusbar overlay -->
+    <div class="statusbar"></div>
+
+    <!-- Your main view, should have "view-main" class -->
+    <div class="view view-main">
+        <stock></stock>
+        <!--<invoice-template key="invoice-template"></invoice-template>
+        <labels-list key="labels-list"></labels-list>
+        <launch-page key="launch"></launch-page>
+        <boards-list key="boards-list"></boards-list>
+        <board-detail key="board-detail"></board-detail>
+        <list-detail key="list-detail"></list-detail>
+        <create-card key="create-card"></create-card>
+        <modify-card key="modify-card"></modify-card>
+        <list-test key="list-test"></list-test>
+        <create-purchase key="create-purchase"></create-purchase>
+        <modify-purchase-card key="modify-purchase-card"></modify-purchase-card>
+        <packing-slip key="packing-slip"></packing-slip> -->
+    </div>
+</div>

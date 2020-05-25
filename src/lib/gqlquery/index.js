@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const crm = require("./crmservice");
+const stock = require("./stockservice");
+const cust = require("./customerservice");
+const c = require("./common");
+exports.crmservice = crm;
+exports.stockservice = stock;
+exports.customerservice = cust;
+exports.common = c;

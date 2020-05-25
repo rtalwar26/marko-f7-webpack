@@ -1,0 +1,26 @@
+{
+  "cwd": "/Users/rtalwar/personal/Projects/node/igapp",
+  "type": [
+    "web"
+  ],
+  "name": "igapp",
+  "framework": "vue",
+  "template": "split-view",
+  "cssPreProcessor": "scss",
+  "bundler": "webpack",
+  "webpack": {
+    "developmentSourceMap": true,
+    "productionSourceMap": true,
+    "hashAssets": false,
+    "preserveAssetsPaths": false,
+    "inlineAssets": true
+  },
+  "theming": {
+    "customColor": true,
+    "color": "#ED1C24",
+    "darkTheme": false,
+    "iconFonts": true,
+    "fillBars": false
+  },
+  "customBuild": false
+}
